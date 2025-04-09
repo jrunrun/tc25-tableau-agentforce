@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPromptTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <activeVersionIdentifier>gA5zMdyfW+9RKLORWx7uPh2/3nGTchmCul/1M8Ng15k=_2</activeVersionIdentifier>
+    <developerName>TableauAnswerVDSQuestion</developerName>
+    <masterLabel>TableauAnswerVDSQuestion</masterLabel>
+    <templateVersions>
+        <content>Convert the {!$Input:result_set}output into summarised formatted text to answer user&apos;s question as followed {!$Input:result_set}
+
+Output using a marked down text format.
+
+Add the &quot;query_plan&quot; entry of the {!$Input:explanation} below, and name that paragraph &quot;Explanation&quot;.
+</content>
+        <inputs>
+            <apiName>prompt_text</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>prompt_text</masterLabel>
+            <referenceName>Input:prompt_text</referenceName>
+            <required>true</required>
+        </inputs>
+        <inputs>
+            <apiName>result_set</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>result_set</masterLabel>
+            <referenceName>Input:result_set</referenceName>
+            <required>true</required>
+        </inputs>
+        <inputs>
+            <apiName>explanation</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>explanation</masterLabel>
+            <referenceName>Input:explanation</referenceName>
+            <required>true</required>
+        </inputs>
+        <primaryModel>sfdc_ai__DefaultOpenAIGPT35Turbo</primaryModel>
+        <status>Published</status>
+        <versionIdentifier>gA5zMdyfW+9RKLORWx7uPh2/3nGTchmCul/1M8Ng15k=_1</versionIdentifier>
+    </templateVersions>
+    <templateVersions>
+        <content>Convert the {!$Input:result_set}output into summarised formatted text to answer user&apos;s question as followed {!$Input:result_set}
+
+Output using a marked down text format.
+
+Add the &quot;query_plan&quot; entry of the {!$Input:explanation} below, and name that paragraph &quot;Explanation&quot;.
+</content>
+        <inputs>
+            <apiName>prompt_text</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>prompt_text</masterLabel>
+            <referenceName>Input:prompt_text</referenceName>
+            <required>true</required>
+        </inputs>
+        <inputs>
+            <apiName>result_set</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>result_set</masterLabel>
+            <referenceName>Input:result_set</referenceName>
+            <required>true</required>
+        </inputs>
+        <inputs>
+            <apiName>explanation</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>explanation</masterLabel>
+            <referenceName>Input:explanation</referenceName>
+            <required>true</required>
+        </inputs>
+        <primaryModel>sfdc_ai__DefaultGPT4Omni</primaryModel>
+        <status>Published</status>
+        <versionIdentifier>gA5zMdyfW+9RKLORWx7uPh2/3nGTchmCul/1M8Ng15k=_2</versionIdentifier>
+    </templateVersions>
+    <type>einstein_gpt__flex</type>
+    <visibility>Global</visibility>
+</GenAiPromptTemplate>

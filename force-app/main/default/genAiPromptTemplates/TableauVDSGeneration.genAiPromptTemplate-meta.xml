@@ -1,0 +1,1844 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPromptTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <activeVersionIdentifier>gA5zMdyfW+9RKLORWx7uPh2/3nGTchmCul/1M8Ng15k=_2</activeVersionIdentifier>
+    <description>A prompt for generating the JSON payload to query Tableau Published Data Sources from natural language questions.</description>
+    <developerName>TableauVDSGeneration</developerName>
+    <masterLabel>TableauVDSGeneration</masterLabel>
+    <templateVersions>
+        <content>vds_schema = {
+  &quot;FieldBase&quot;: {
+    &quot;type&quot;: &quot;object&quot;,
+    &quot;description&quot;: &quot;Common properties of a Field. A Field represents a column of data in a published datasource&quot;,
+    &quot;required&quot;: [ &quot;fieldCaption&quot; ],
+    &quot;properties&quot;: {
+      &quot;fieldCaption&quot;: {
+        &quot;type&quot;: &quot;string&quot;,
+        &quot;description&quot;: &quot;Either the name of a specific Field in the data source, or, in the case of a calculation, a user-supplied name for the calculation.&quot;
+      },
+      &quot;fieldAlias&quot;: {
+        &quot;type&quot;: &quot;string&quot;,
+        &quot;description&quot;: &quot;An alternative name to give the field. Will only be used in Object format output.&quot;
+      },
+      &quot;maxDecimalPlaces&quot;: {
+        &quot;type&quot;: &quot;integer&quot;,
+        &quot;description&quot;: &quot;The maximum number of decimal places. Any trailing 0s will be dropped. The maxDecimalPlaces value must be greater or equal to 0.&quot;
+      },
+      &quot;sortDirection&quot;: {
+        &quot;$ref&quot;: &quot;#/components/schemas/SortDirection&quot;
+      },
+      &quot;sortPriority&quot;: {
+        &quot;type&quot;: &quot;integer&quot;,
+        &quot;description&quot;: &quot;To enable sorting on a specific Field provide a sortPriority for that field, and that field will be sorted. The sortPriority provides a ranking of how to sort Fields when multiple Fields are being sorted. The highest priority (lowest number) Field is sorted first. If only 1 Field is being sorted, then any value may be used for sortPriority. SortPriority should be an integer greater than 0.&quot;
+      }
+    }
+  },
+  &quot;Field&quot;: {
+    &quot;oneOf&quot;: [
+      {
+        &quot;allOf&quot;: [
+          {
+            &quot;$ref&quot;: &quot;#/components/schemas/FieldBase&quot;
+          }
+        ],
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;additionalProperties&quot;: False,
+        &quot;properties&quot;: {
+          &quot;fieldCaption&quot;: {},
+          &quot;fieldAlias&quot;: {},
+          &quot;maxDecimalPlaces&quot;: {},
+          &quot;sortDirection&quot;: {},
+          &quot;sortPriority&quot;: {}
+        }
+      },
+      {
+        &quot;allOf&quot;: [
+          {
+            &quot;$ref&quot;: &quot;#/components/schemas/FieldBase&quot;
+          }
+        ],
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;required&quot;: [
+          &quot;function&quot;
+        ],
+        &quot;additionalProperties&quot;: False,
+        &quot;properties&quot;: {
+          &quot;function&quot;: {
+            &quot;$ref&quot;: &quot;#/components/schemas/Function&quot;
+          },
+          &quot;fieldCaption&quot;: {},
+          &quot;fieldAlias&quot;: {},
+          &quot;maxDecimalPlaces&quot;: {},
+          &quot;sortDirection&quot;: {},
+          &quot;sortPriority&quot;: {}
+        }
+      },
+      {
+        &quot;allOf&quot;: [
+          {
+            &quot;$ref&quot;: &quot;#/components/schemas/FieldBase&quot;
+          }
+        ],
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;required&quot;: [
+          &quot;calculation&quot;
+        ],
+        &quot;additionalProperties&quot;: False,
+        &quot;properties&quot;: {
+          &quot;calculation&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;A Tableau calculation which will be returned as a Field in the Query&quot;
+          },
+          &quot;fieldCaption&quot;: {},
+          &quot;fieldAlias&quot;: {},
+          &quot;maxDecimalPlaces&quot;: {},
+          &quot;sortDirection&quot;: {},
+          &quot;sortPriority&quot;: {}
+        }
+      }
+    ]
+  },
+  &quot;FieldMetadata&quot;: {
+    &quot;type&quot;: &quot;object&quot;,
+    &quot;description&quot;: &quot;Describes a field in the datasource that can be used to create queries.&quot;,
+    &quot;properties&quot;: {
+      &quot;fieldName&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      },
+      &quot;fieldCaption&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      },
+      &quot;dataType&quot;: {
+        &quot;type&quot;: &quot;string&quot;,
+        &quot;enum&quot;: [
+          &quot;INTEGER&quot;,
+          &quot;REAL&quot;,
+          &quot;STRING&quot;,
+          &quot;DATETIME&quot;,
+          &quot;BOOLEAN&quot;,
+          &quot;DATE&quot;,
+          &quot;SPATIAL&quot;,
+          &quot;UNKNOWN&quot;
+        ]
+      },
+      &quot;logicalTableId&quot;: {
+        &quot;type&quot;: &quot;string&quot;
+      }
+    }
+  },
+  &quot;Filter&quot;: {
+    &quot;type&quot;: &quot;object&quot;,
+    &quot;description&quot;: &quot;A Filter to be used in the Query to filter on the datasource&quot;,
+    &quot;required&quot;: [&quot;field&quot;, &quot;filterType&quot;],
+    &quot;properties&quot;: {
+      &quot;field&quot;: {
+        &quot;$ref&quot;: &quot;#/components/schemas/FilterField&quot;
+      },
+      &quot;filterType&quot;: {
+        &quot;type&quot;: &quot;string&quot;,
+        &quot;enum&quot;: [
+          &quot;QUANTITATIVE_DATE&quot;,
+          &quot;QUANTITATIVE_NUMERICAL&quot;,
+          &quot;SET&quot;,
+          &quot;MATCH&quot;,
+          &quot;DATE&quot;,
+          &quot;TOP&quot;
+        ]
+      },
+      &quot;context&quot;: {
+        &quot;type&quot;: &quot;boolean&quot;,
+        &quot;description&quot;: &quot;Make the given filter a Context Filter, meaning that it&apos;s an independent filter. Any other filters that you set are defined as dependent filters because they process only the data that passes through the context filter&quot;,
+        &quot;default&quot;: False
+      }
+    },
+    &quot;discriminator&quot;: {
+      &quot;propertyName&quot;: &quot;filterType&quot;,
+      &quot;mapping&quot;: {
+        &quot;QUANTITATIVE_DATE&quot;: &quot;#/components/schemas/QuantitativeDateFilter&quot;,
+        &quot;QUANTITATIVE_NUMERICAL&quot;: &quot;#/components/schemas/QuantitativeNumericalFilter&quot;,
+        &quot;SET&quot;: &quot;#/components/schemas/SetFilter&quot;,
+        &quot;MATCH&quot;: &quot;#/components/schemas/MatchFilter&quot;,
+        &quot;DATE&quot;: &quot;#/components/schemas/RelativeDateFilter&quot;,
+        &quot;TOP&quot;: &quot;#/components/schemas/TopNFilter&quot;
+      }
+    }
+  },
+  &quot;FilterField&quot;: {
+    &quot;oneOf&quot;: [
+      {
+        &quot;required&quot;: [&quot;fieldCaption&quot;],
+        &quot;additionalProperties&quot;: False,
+        &quot;properties&quot;: {
+          &quot;fieldCaption&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;The caption of the field to filter on&quot;
+          }
+        }
+      },
+      {
+        &quot;required&quot;: [&quot;fieldCaption&quot;, &quot;function&quot;],
+        &quot;additionalProperties&quot;: False,
+        &quot;properties&quot;: {
+          &quot;fieldCaption&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;The caption of the field to filter on&quot;
+          },
+          &quot;function&quot;: {
+            &quot;$ref&quot;: &quot;#/components/schemas/Function&quot;
+          }
+        }
+      },
+      {
+        &quot;required&quot;: [&quot;calculation&quot;],
+        &quot;additionalProperties&quot;: False,
+        &quot;properties&quot;: {
+          &quot;calculation&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;A Tableau calculation which will be used to Filter on&quot;
+          }
+        }
+      }
+    ]
+  },
+  &quot;Function&quot;: {
+    &quot;type&quot;: &quot;string&quot;,
+    &quot;description&quot;: &quot;The standard set of Tableau aggregations which can be applied to a Field&quot;,
+    &quot;enum&quot;: [
+      &quot;SUM&quot;,
+      &quot;AVG&quot;,
+      &quot;MEDIAN&quot;,
+      &quot;COUNT&quot;,
+      &quot;COUNTD&quot;,
+      &quot;MIN&quot;,
+      &quot;MAX&quot;,
+      &quot;STDEV&quot;,
+      &quot;VAR&quot;,
+      &quot;COLLECT&quot;,
+      &quot;YEAR&quot;,
+      &quot;QUARTER&quot;,
+      &quot;MONTH&quot;,
+      &quot;WEEK&quot;,
+      &quot;DAY&quot;,
+      &quot;TRUNC_YEAR&quot;,
+      &quot;TRUNC_QUARTER&quot;,
+      &quot;TRUNC_MONTH&quot;,
+      &quot;TRUNC_WEEK&quot;,
+      &quot;TRUNC_DAY&quot;
+    ]
+  },
+  &quot;MatchFilter&quot;: {
+    &quot;allOf&quot;: [
+      {
+        &quot;$ref&quot;: &quot;#/components/schemas/Filter&quot;
+      },
+      {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;description&quot;: &quot;A Filter that can be used to match against String Fields&quot;,
+        &quot;properties&quot;: {
+          &quot;contains&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;Matches when a Field contains this value&quot;
+          },
+          &quot;startsWith&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;Matches when a Field starts with this value&quot;
+          },
+          &quot;endsWith&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;Matches when a Field ends with this value&quot;
+          },
+          &quot;exclude&quot;: {
+            &quot;type&quot;: &quot;boolean&quot;,
+            &quot;description&quot;: &quot;When true, the inverse of the matching logic will be used&quot;,
+            &quot;default&quot;: False
+          }
+        }
+      }
+    ]
+  },
+  &quot;QuantitativeFilterBase&quot;: {
+    &quot;allOf&quot;: [
+      {
+        &quot;$ref&quot;: &quot;#/components/schemas/Filter&quot;
+      },
+      {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;required&quot;: [&quot;quantitativeFilterType&quot;],
+        &quot;properties&quot;: {
+          &quot;quantitativeFilterType&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;enum&quot;: [ &quot;RANGE&quot;, &quot;MIN&quot;, &quot;MAX&quot;, &quot;ONLY_NULL&quot;, &quot;ONLY_NON_NULL&quot; ]
+          },
+          &quot;includeNulls&quot;: {
+            &quot;type&quot;: &quot;boolean&quot;,
+            &quot;description&quot;: &quot;Only applies to RANGE, MIN, and MAX Filters. Should nulls be returned or not. If not provided the default is to not include null values&quot;
+          }
+        }
+      }
+    ]
+  },
+  &quot;QuantitativeNumericalFilter&quot;: {
+    &quot;allOf&quot;: [
+      {
+        &quot;$ref&quot;: &quot;#/components/schemas/QuantitativeFilterBase&quot;
+      }
+    ],
+    &quot;type&quot;: &quot;object&quot;,
+    &quot;description&quot;: &quot;A Filter that can be used to find the minimumn, maximumn or range of numerical values of a Field&quot;,
+    &quot;properties&quot;: {
+      &quot;min&quot;: {
+        &quot;type&quot;: &quot;number&quot;,
+        &quot;description&quot;: &quot;A numerical value, either integer or floating point indicating the minimum value to filter upon. Required if using quantitativeFilterType RANGE or if using quantitativeFilterType MIN&quot;
+      },
+      &quot;max&quot;: {
+        &quot;type&quot;: &quot;number&quot;,
+        &quot;description&quot;: &quot;A numerical value, either integer or floating point indicating the maximum value to filter upon. Required if using quantitativeFilterType RANGE or if using quantitativeFilterType MIN&quot;
+      }
+    }
+  },
+  &quot;QuantitativeDateFilter&quot;: {
+    &quot;allOf&quot;: [
+      {
+        &quot;$ref&quot;: &quot;#/components/schemas/QuantitativeFilterBase&quot;
+      }
+    ],
+    &quot;type&quot;: &quot;object&quot;,
+    &quot;description&quot;: &quot;A Filter that can be used to find the minimum, maximum or range of date values of a Field&quot;,
+    &quot;properties&quot;: {
+      &quot;minDate&quot;: {
+        &quot;type&quot;: &quot;string&quot;,
+        &quot;format&quot;: &quot;date&quot;,
+        &quot;description&quot;: &quot;An RFC 3339 date indicating the earliest date to filter upon. Required if using quantitativeFilterType RANGE or if using quantitativeFilterType MIN&quot;
+      },
+      &quot;maxDate&quot;: {
+        &quot;type&quot;: &quot;string&quot;,
+        &quot;format&quot;: &quot;date&quot;,
+        &quot;description&quot;: &quot;An RFC 3339 date indicating the latest date to filter upon. Required if using quantitativeFilterType RANGE or if using quantitativeFilterType MIN&quot;
+      }
+    }
+  },
+  &quot;Query&quot;: {
+    &quot;description&quot;: &quot;The Query is the fundamental interface to Headless BI. It holds the specific semantics to perform against the Data Source. A Query consists of an array of Fields to query against, and an optional array of filters to apply to the query&quot;,
+    &quot;required&quot;: [
+      &quot;fields&quot;
+    ],
+    &quot;type&quot;: &quot;object&quot;,
+    &quot;properties&quot;: {
+      &quot;fields&quot;: {
+        &quot;description&quot;: &quot;An array of Fields that define the query&quot;,
+        &quot;type&quot;: &quot;array&quot;,
+        &quot;items&quot;: {
+          &quot;$ref&quot;: &quot;#/components/schemas/Field&quot;
+        }
+      },
+      &quot;filters&quot;: {
+        &quot;description&quot;: &quot;An optional array of Filters to apply to the query&quot;,
+        &quot;type&quot;: &quot;array&quot;,
+        &quot;items&quot;: {
+          &quot;$ref&quot;: &quot;#/components/schemas/Filter&quot;
+        }
+      }
+    },
+    &quot;additionalProperties&quot;: False
+  },
+  &quot;SetFilter&quot;: {
+    &quot;allOf&quot;: [
+      {
+        &quot;$ref&quot;: &quot;#/components/schemas/Filter&quot;
+      }
+    ],
+    &quot;type&quot;: &quot;object&quot;,
+    &quot;description&quot;: &quot;A Filter that can be used to filter on a specific set of values of a Field&quot;,
+    &quot;required&quot;: [
+      &quot;values&quot;
+    ],
+    &quot;properties&quot;: {
+      &quot;values&quot;: {
+        &quot;type&quot;: &quot;array&quot;,
+        &quot;items&quot;: {},
+        &quot;description&quot;: &quot;An array of values to filter on&quot;
+      },
+      &quot;exclude&quot;: {
+        &quot;type&quot;: &quot;boolean&quot;,
+        &quot;default&quot;: False
+      }
+    }
+  },
+  &quot;SortDirection&quot;: {
+    &quot;type&quot;: &quot;string&quot;,
+    &quot;description&quot;: &quot;The direction of the sort, either ascending or descending. If not supplied the default is ascending&quot;,
+    &quot;enum&quot;: [
+      &quot;ASC&quot;,
+      &quot;DESC&quot;
+    ]
+  },
+  &quot;RelativeDateFilter&quot;: {
+    &quot;allOf&quot;: [
+      {
+        &quot;$ref&quot;: &quot;#/components/schemas/Filter&quot;
+      },
+      {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;description&quot;: &quot;A Filter that can be used to filter on dates using a specific anchor and fields that specify a relative date range to that anchor&quot;,
+        &quot;required&quot;: [&quot;periodType&quot;, &quot;dateRangeType&quot;],
+        &quot;properties&quot;: {
+          &quot;periodType&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;The units of time in the relative date range&quot;,
+            &quot;enum&quot;: [
+              &quot;MINUTES&quot;,
+              &quot;HOURS&quot;,
+              &quot;DAYS&quot;,
+              &quot;WEEKS&quot;,
+              &quot;MONTHS&quot;,
+              &quot;QUARTERS&quot;,
+              &quot;YEARS&quot;
+            ]
+          },
+          &quot;dateRangeType&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;description&quot;: &quot;The direction in the relative date range&quot;,
+            &quot;enum&quot;: [
+              &quot;CURRENT&quot;,
+              &quot;LAST&quot;,
+              &quot;LASTN&quot;,
+              &quot;NEXT&quot;,
+              &quot;NEXTN&quot;,
+              &quot;TODATE&quot;
+            ]
+          },
+          &quot;rangeN&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;When dateRangeType is LASTN or NEXTN, this is the N value (how many years, months, etc.).&quot;
+          },
+          &quot;anchorDate&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;format&quot;: &quot;date&quot;,
+            &quot;description&quot;: &quot;When this field is not provided, defaults to today.&quot;
+          },
+          &quot;includeNulls&quot;: {
+            &quot;type&quot;: &quot;boolean&quot;,
+            &quot;description&quot;: &quot;Should nulls be returned or not. If not provided the default is to not include null values&quot;
+          }
+        }
+      }
+    ]
+  },
+  &quot;TopNFilter&quot;: {
+    &quot;allOf&quot;: [
+      {
+        &quot;$ref&quot;: &quot;#/components/schemas/Filter&quot;
+      },
+      {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;description&quot;: &quot;A Filter that can be used to find the top or bottom number of Fields relative to the values in the fieldToMeasure&quot;,
+        &quot;required&quot;: [&quot;howMany, fieldToMeasure&quot;],
+        &quot;properties&quot;: {
+          &quot;direction&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;enum&quot;: [
+                &quot;TOP&quot;,
+                &quot;BOTTOM&quot;
+              ],
+            &quot;default&quot;: &quot;TOP&quot;,
+            &quot;description&quot;: &quot;Top (Ascending) or Bottom (Descending) N&quot;
+          },
+          &quot;howMany&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;description&quot;: &quot;The number of values from the Top or the Bottom of the given fieldToMeasure&quot;
+          },
+          &quot;fieldToMeasure&quot;: {
+            &quot;$ref&quot;: &quot;#/components/schemas/FilterField&quot;
+          }
+        }
+      }
+    ]
+  }
+}
+
+
+sample_queries = [
+  {
+    &quot;example&quot;: &quot;a simple query&quot;,
+    &quot;query&quot;: {
+      &quot;fields&quot;: [
+        {
+          &quot;fieldCaption&quot;: &quot;Category&quot;
+        },{
+          &quot;fieldCaption&quot;: &quot;Sales&quot;,
+          &quot;function&quot;: &quot;SUM&quot;
+        }
+      ]
+    }
+  },
+  {
+    &quot;example&quot;: &quot;a simple Tableau calculation&quot;,
+    &quot;query&quot;: {
+      &quot;fields&quot;: [
+        {
+          &quot;fieldCaption&quot;: &quot;AOV&quot;,
+          &quot;calculation&quot;: &quot;SUM([Profit])/COUNTD([Order ID])&quot;
+        }
+      ]
+    }
+  },
+  {
+    &quot;example&quot;: &quot;applying a set filter&quot;,
+    &quot;query&quot;: {
+      &quot;fields&quot;: [
+        {
+          &quot;fieldCaption&quot;: &quot;Ship Mode&quot;
+        },{
+          &quot;fieldCaption&quot;: &quot;Sales&quot;,
+          &quot;function&quot;: &quot;SUM&quot;
+        }
+      ],
+      &quot;filters&quot;: [
+        {
+          &quot;field&quot;: {
+            &quot;fieldCaption&quot;: &quot;Ship Mode&quot;
+          },
+          &quot;filterType&quot;: &quot;SET&quot;,
+          &quot;values&quot;: [ &quot;First Class&quot;, &quot;Standard Class&quot; ],
+          &quot;exclude&quot;: &quot;false&quot;
+        }
+      ]
+    }
+  },
+  {
+    &quot;example&quot;: &quot;applying a quantitative filter&quot;,
+    &quot;query&quot;: {
+      &quot;fields&quot;: [
+        {
+          &quot;fieldCaption&quot;: &quot;Ship Mode&quot;
+        },{
+          &quot;fieldCaption&quot;: &quot;Sales&quot;,
+          &quot;function&quot;: &quot;SUM&quot;
+        }
+      ],
+      &quot;filters&quot;: [
+        {
+          &quot;field&quot;: {
+            &quot;fieldCaption&quot;: &quot;Sales&quot;,
+            &quot;function&quot;: &quot;SUM&quot;
+          },
+          &quot;filterType&quot;: &quot;QUANTITATIVE_NUMERICAL&quot;,
+          &quot;quantitativeFilterType&quot;: &quot;RANGE&quot;,
+          &quot;min&quot;: 266839,
+          &quot;max&quot;: 1149562
+        }
+      ]
+    }
+  },
+  {
+    &quot;example&quot;: &quot;applying a quantitative date filter&quot;,
+    &quot;query&quot;: {
+      &quot;fields&quot;: [
+        {
+          &quot;fieldCaption&quot;: &quot;Order Date&quot;,
+          &quot;function&quot;: &quot;YEAR&quot;
+        },
+        {
+          &quot;fieldCaption&quot;: &quot;Order Date&quot;,
+          &quot;function&quot;: &quot;QUARTER&quot;
+        },
+        {
+          &quot;fieldCaption&quot;: &quot;Sales&quot;,
+          &quot;function&quot;: &quot;SUM&quot;
+        }
+      ],
+      &quot;filters&quot;: [
+        {
+          &quot;field&quot;:{
+            &quot;fieldCaption&quot;: &quot;Order Date&quot;
+          },
+          &quot;filterType&quot;: &quot;QUANTITATIVE_DATE&quot;,
+          &quot;quantitativeFilterType&quot;: &quot;MIN&quot;,
+          &quot;minDate&quot;: &quot;2020-01-01&quot;
+        }
+      ]
+    }
+  },
+  {
+    &quot;example&quot;: &quot;applying a date filter&quot;,
+    &quot;query&quot;: {
+      &quot;fields&quot;: [
+        {
+          &quot;fieldCaption&quot;: &quot;Order Date&quot;,
+          &quot;function&quot;: &quot;YEAR&quot;,
+          &quot;sortPriority&quot;: 1
+        },
+        {
+          &quot;fieldCaption&quot;: &quot;Order Date&quot;,
+          &quot;function&quot;: &quot;MONTH&quot;,
+          &quot;sortPriority&quot;: 2
+        },
+        {
+          &quot;fieldCaption&quot;: &quot;Sales&quot;,
+          &quot;function&quot;: &quot;SUM&quot;
+        }
+      ],
+      &quot;filters&quot;: [
+        {
+          &quot;filterType&quot;: &quot;DATE&quot;,
+          &quot;field&quot;: {
+            &quot;fieldCaption&quot;: &quot;Order Date&quot;
+          },
+          &quot;periodType&quot;: &quot;MONTHS&quot;,
+          &quot;dateRangeType&quot;: &quot;CURRENT&quot;,
+          &quot;anchorDate&quot;: &quot;2021-01-01&quot;
+        }
+      ]
+    }
+  },
+  {
+    &quot;example&quot;: &quot;applying a match filter&quot;,
+    &quot;query&quot;: {
+      &quot;fields&quot;: [
+        {
+          &quot;fieldCaption&quot;: &quot;State/Province&quot;
+        },{
+          &quot;fieldCaption&quot;: &quot;Sales&quot;,
+          &quot;function&quot;: &quot;SUM&quot;
+        }
+      ],
+      &quot;filters&quot;: [
+        {
+          &quot;field&quot;: {
+            &quot;fieldCaption&quot;: &quot;State/Province&quot;
+          },
+          &quot;filterType&quot;: &quot;MATCH&quot;,
+          &quot;startsWith&quot;: &quot;A&quot;,
+          &quot;endsWith&quot;: &quot;a&quot;,
+          &quot;contains&quot;: &quot;o&quot;,
+          &quot;exclude&quot;: &quot;false&quot;
+        }
+      ]
+    }
+  },
+  {
+    &quot;example&quot;: &quot;applying a top N filter&quot;,
+    &quot;query&quot;: {
+      &quot;fields&quot;: [
+        {
+          &quot;fieldCaption&quot;: &quot;State/Province&quot;
+        },{
+          &quot;fieldCaption&quot;: &quot;Profit&quot;,
+          &quot;function&quot;: &quot;SUM&quot;
+        }
+      ],
+      &quot;filters&quot;: [
+        {
+          &quot;field&quot;: {
+            &quot;fieldCaption&quot;: &quot;State/Province&quot;
+          },
+          &quot;filterType&quot;: &quot;TOP&quot;,
+          &quot;howMany&quot;: 10,
+          &quot;fieldToMeasure&quot;: {
+            &quot;fieldCaption&quot;: &quot;Profit&quot;,
+            &quot;function&quot;: &quot;SUM&quot;
+          },
+          &quot;direction&quot;: &quot;TOP&quot;
+        }
+      ]
+    }
+  },
+  {
+    &quot;example&quot;: &quot;applying a multi-set filter&quot;,
+    &quot;query&quot;: {
+      &quot;fields&quot;: [
+        {
+          &quot;fieldCaption&quot;: &quot;Ship Mode&quot;
+        },
+        {
+          &quot;fieldCaption&quot;: &quot;Segment&quot;
+        }, {
+          &quot;fieldCaption&quot;: &quot;Sales&quot;,
+          &quot;function&quot;: &quot;SUM&quot;
+        }
+      ],
+      &quot;filters&quot;: [
+        {
+          &quot;field&quot;: {
+            &quot;fieldCaption&quot;: &quot;Ship Mode&quot;
+          },
+          &quot;filterType&quot;: &quot;SET&quot;,
+          &quot;values&quot;: [ &quot;First Class&quot;, &quot;Standard Class&quot; ],
+          &quot;exclude&quot;: &quot;false&quot;
+        }, {
+          &quot;field&quot;: {
+            &quot;fieldCaption&quot;: &quot;Segment&quot;
+          },
+          &quot;filterType&quot;: &quot;SET&quot;,
+          &quot;values&quot;: [ &quot;Consumer&quot; ],
+          &quot;exclude&quot;: &quot;true&quot;
+        }
+      ]
+    }
+  },
+  {
+    &quot;example&quot;: &quot;applying multiple quantitative filters&quot;,
+    &quot;query&quot;: {
+      &quot;fields&quot;: [
+        {
+          &quot;fieldCaption&quot;: &quot;Ship Mode&quot;
+        },{
+          &quot;fieldCaption&quot;: &quot;Sales&quot;,
+          &quot;function&quot;: &quot;SUM&quot;
+        },{
+          &quot;fieldCaption&quot;: &quot;Profit&quot;,
+          &quot;function&quot;: &quot;SUM&quot;
+        }
+      ],
+      &quot;filters&quot;: [
+        {
+          &quot;field&quot;: {
+            &quot;fieldCaption&quot;: &quot;Sales&quot;,
+            &quot;function&quot;: &quot;SUM&quot;
+          },
+          &quot;filterType&quot;: &quot;QUANTITATIVE_NUMERICAL&quot;,
+          &quot;quantitativeFilterType&quot;: &quot;MIN&quot;,
+          &quot;min&quot;: 266839
+        },
+        {
+          &quot;field&quot;: {
+            &quot;fieldCaption&quot;: &quot;Profit&quot;,
+            &quot;function&quot;: &quot;SUM&quot;
+          },
+          &quot;filterType&quot;: &quot;QUANTITATIVE_NUMERICAL&quot;,
+          &quot;quantitativeFilterType&quot;: &quot;MAX&quot;,
+          &quot;max&quot;: 164098
+        }
+      ]
+    }
+  },
+  {
+    &quot;example&quot;: &quot;applying set and quantitative filters&quot;,
+    &quot;query&quot;: {
+      &quot;fields&quot;: [
+        {
+          &quot;fieldCaption&quot;: &quot;Ship Mode&quot;
+        },{
+          &quot;fieldCaption&quot;: &quot;Sales&quot;,
+          &quot;function&quot;: &quot;SUM&quot;
+        }
+      ],
+      &quot;filters&quot;: [
+        {
+          &quot;field&quot;: {
+            &quot;fieldCaption&quot;: &quot;Ship Mode&quot;
+          },
+          &quot;filterType&quot;: &quot;SET&quot;,
+          &quot;values&quot;: [ &quot;First Class&quot;, &quot;Standard Class&quot; ],
+          &quot;exclude&quot;: &quot;true&quot;
+        }, {
+          &quot;field&quot;: {
+            &quot;fieldCaption&quot;: &quot;Sales&quot;,
+            &quot;function&quot;: &quot;SUM&quot;
+          },
+          &quot;filterType&quot;: &quot;QUANTITATIVE_NUMERICAL&quot;,
+          &quot;quantitativeFilterType&quot;: &quot;MIN&quot;,
+          &quot;min&quot;: 400000
+        }
+      ]
+    }
+  },
+  {
+    &quot;example&quot;: &quot;applying a context filter&quot;,
+    &quot;query&quot;: {
+      &quot;fields&quot;: [
+        {
+          &quot;fieldCaption&quot;: &quot;Sub-Category&quot;
+        },{
+          &quot;fieldCaption&quot;: &quot;Sales&quot;,
+          &quot;function&quot;: &quot;SUM&quot;
+        }
+      ],
+      &quot;filters&quot;: [
+        {
+          &quot;field&quot;: {
+            &quot;fieldCaption&quot;: &quot;Sub-Category&quot;
+          },
+          &quot;filterType&quot;: &quot;TOP&quot;,
+          &quot;howMany&quot;: 10,
+          &quot;fieldToMeasure&quot;: {
+            &quot;fieldCaption&quot;: &quot;Sales&quot;,
+            &quot;function&quot;: &quot;SUM&quot;
+          },
+          &quot;direction&quot;: &quot;TOP&quot;
+        },
+        {
+          &quot;field&quot;: {
+            &quot;fieldCaption&quot;: &quot;Category&quot;
+          },
+          &quot;filterType&quot;: &quot;SET&quot;,
+          &quot;values&quot;: [ &quot;Furniture&quot;],
+          &quot;exclude&quot;: &quot;false&quot;,
+          &quot;context&quot;: &quot;true&quot;
+        }
+      ]
+    }
+  },
+  {
+    &quot;example&quot;: &quot;applying date, set and quantitative filters&quot;,
+    &quot;query&quot;: {
+      &quot;fields&quot;: [
+        {
+          &quot;fieldCaption&quot;: &quot;Order Date&quot;
+        },{
+          &quot;fieldCaption&quot;: &quot;Sales&quot;,
+          &quot;function&quot;: &quot;SUM&quot;
+        },
+        {
+          &quot;fieldCaption&quot;: &quot;Ship Mode&quot;
+        }
+      ],
+      &quot;filters&quot;: [
+        {
+          &quot;field&quot;: {
+            &quot;fieldCaption&quot;: &quot;Sales&quot;,
+            &quot;function&quot;: &quot;SUM&quot;
+          },
+          &quot;filterType&quot;: &quot;QUANTITATIVE_NUMERICAL&quot;,
+          &quot;quantitativeFilterType&quot;: &quot;RANGE&quot;,
+          &quot;min&quot;: 10,
+          &quot;max&quot;: 63
+        },
+        {
+          &quot;filterType&quot;: &quot;DATE&quot;,
+          &quot;field&quot;: {
+            &quot;fieldCaption&quot;: &quot;Order Date&quot;
+          },
+          &quot;periodType&quot;: &quot;MONTHS&quot;,
+          &quot;dateRangeType&quot;: &quot;NEXTN&quot;,
+          &quot;rangeN&quot;: 3,
+          &quot;anchorDate&quot;: &quot;2021-01-01&quot;
+        },
+        {
+          &quot;field&quot;: {
+            &quot;fieldCaption&quot;: &quot;Ship Mode&quot;
+          },
+          &quot;filterType&quot;: &quot;SET&quot;,
+          &quot;values&quot;: [ &quot;First Class&quot;],
+          &quot;exclude&quot;: &quot;false&quot;
+        }
+      ]
+    }
+  },
+]
+
+
+faq_queries = [
+  {
+    &quot;user_input&quot;: &quot;Average discount, total sales, number of orders and profits by region sorted by profit&quot;,
+    &quot;best_practices&quot;: &quot;&quot;,
+    &quot;JSON&quot;: {
+      &quot;fields&quot;: [
+        {&quot;fieldCaption&quot;: &quot;Region&quot;},
+        {&quot;fieldCaption&quot;: &quot;Discount&quot;, &quot;function&quot;: &quot;AVG&quot;, &quot;maxDecimalPlaces&quot;: 2},
+        {&quot;fieldCaption&quot;: &quot;Sales&quot;, &quot;function&quot;: &quot;SUM&quot;, &quot;maxDecimalPlaces&quot;: 2},
+        {&quot;fieldCaption&quot;: &quot;Order ID&quot;, &quot;function&quot;: &quot;COUNT&quot;, &quot;columnAlias&quot;: &quot;Number of Orders&quot;},
+        {&quot;fieldCaption&quot;: &quot;Profit&quot;, &quot;function&quot;: &quot;SUM&quot;, &quot;maxDecimalPlaces&quot;: 2, &quot;sortPriority&quot;: 1, &quot;sortDirection&quot;: &quot;DESC&quot;}
+      ]
+    }
+  },
+  {
+    &quot;user_input&quot;: &quot;What are the top 5 sub-categories by sales with a minimum of $200,000 in the last 6 months, excluding Technology?&quot;,
+    &quot;best_practices&quot;: &quot;&quot;,
+    &quot;JSON&quot;: {
+      &quot;fields&quot;: [
+        { &quot;fieldCaption&quot;: &quot;Category&quot; },
+        { &quot;fieldCaption&quot;: &quot;Sub-Category&quot; },
+        { &quot;fieldCaption&quot;: &quot;Sales&quot;, &quot;function&quot;: &quot;SUM&quot;, &quot;maxDecimalPlaces&quot;: 2, &quot;sortPriority&quot;: 1, &quot;sortDirection&quot;: &quot;DESC&quot; }
+      ],
+      &quot;filters&quot;: [
+        {
+          &quot;field&quot;: {
+            &quot;fieldCaption&quot;: &quot;Category&quot;
+          },
+          &quot;filterType&quot;: &quot;SET&quot;,
+          &quot;values&quot;: [&quot;Technology&quot;],
+          &quot;exclude&quot;: &quot;true&quot;,
+          &quot;context&quot;: &quot;true&quot;
+        },
+        {
+          &quot;field&quot;: {
+            &quot;fieldCaption&quot;: &quot;Category&quot;
+          },
+          &quot;filterType&quot;: &quot;TOP&quot;,
+          &quot;direction&quot;: &quot;TOP&quot;,
+          &quot;howMany&quot;: 5,
+          &quot;fieldToMeasure&quot;: {
+            &quot;fieldCaption&quot;: &quot;Sales&quot;,
+            &quot;function&quot;: &quot;SUM&quot;
+          }
+        },
+        {
+          &quot;field&quot;: { &quot;fieldCaption&quot;: &quot;Order Date&quot; },
+          &quot;filterType&quot;: &quot;DATE&quot;,
+          &quot;periodtype&quot;: &quot;MONTHS&quot;,
+          &quot;dateRangeType&quot;: &quot;LASTN&quot;,
+          &quot;rangeN&quot;: 6
+        },
+        {
+          &quot;field&quot;: {
+            &quot;fieldCaption&quot;: &quot;Sales&quot;
+          },
+          &quot;filterType&quot;: &quot;QUANTITATIVE_NUMERICAL&quot;,
+          &quot;quantitativeFilterType&quot;: &quot;MIN&quot;,
+          &quot;min&quot;: 200000
+        }
+      ]
+    }
+  }
+]
+
+
+vds_instructions = f&quot;&quot;&quot;
+Task:
+Your job is to write the main body of a request to the Tableau VizQL Data Service (VDS) API to
+obtain data that answers the user&apos;s question or satisfies the task they commanded you to do
+
+Data Dictionary:
+The `data_dictionary` key is crucial to map the user&apos;s natural language questions to the fields of data
+available in the data source and to be aware of any additional operations that may be needed to conceptualize
+the data correctly according to business semantics or logic such as applying filters, aggregations, dates, etc.
+
+Data Model:
+To obtain metadata and sample values for fields in the data source look at the `data_model` key, this is useful
+in particular when aggregating or filtering
+
+Schema:
+Refer to the `vds_schema` key to understand how to formulate correct JSON syntax for the payloads sent to the
+VDS API
+
+Query:
+The query must be written according to the `vds_schema.Query` key. Which describes two properties: fields (required)
+and filters (optional)
+
+Fields:
+To satisfy the required &quot;fields&quot; property of `vds_schema.Query`, add fields according to the `vds_schema.Field` key,
+which references `vds_schema.FieldBase`. Use the `data_dictionary` and `data_model` keys to query all useful or related
+fields, including those not directly related to the topics mentioned by the user. Even if additional transformations or
+calculations are needed, the additional fields may be useful. DO NOT HALLUCINATE FIELD NAMES
+
+Aggregations:
+ALWAYS AGGREGATE THE DATA to avoid row-level results that are too granular and not insightful. The only reason to avoid
+aggregations would be if the user expicitly asked for unaggregated or row-level results. Aggregations are a property of
+`vds_schema.Field` called &quot;functions&quot; and are described in `vds_schema.Functions`. For INTEGER or REAL fields, you must
+always aggregate it with one of these: SUM, AVG, MEDIAN, COUNT, COUNTD, MIN or MAX. For DATETIME or DATE fields, you must
+always aggregate it with one of these: YEAR, QUARTER, MONTH, WEEK, DAY, TRUNC_YEAR, TRUNC_QUARTER, TRUNC_MONTH, TRUNC_WEEK
+or TRUNC_DAY
+
+Sorting:
+Sort fields as often as possible to highlight data of interest in the query even if not explicitly stated by the user. That
+means that if they asked about a field in particular, find a way to sort it that makes sense. Sorting is composed of two
+properties applied to `vds_schema.Field`: &quot;sortDirection&quot; described by `vds_schema.SortDirection` and &quot;SortPriority&quot; which
+is sets the sort order for fields in the query. &quot;SortPriority&quot; is only needed for fields you wish to sort
+
+Filtering:
+Add filters to narrow down the data set according to user specifications and to avoid unnecessary large volumes of data.
+Filters are the second and optional property of `vds_schema.Query` and should be written according to `vds_schema.Filter`.
+The `vds_schema.Filter` spec references `vds_schema.FilterField`
+
+There are many types of filters. To choose the right kind of filters you must first use the `data_model` key to map the
+target field to the kind of filters it supports. Use the &quot;dataType&quot; for each field (ex. &quot;dataType&quot;: &quot;STRING&quot;) and the
+following list of filter types to make this determination:
+
+- MatchFilter (defined at `vds_schema.MatchFilter`):
+- QuantitativeFilterBase (defined at `vds_schema.QuantitativeFilterBase`):
+- QuantitativeNumericalFilter (defined at `vds_schema.QuantitativeNumericalFilter`):
+- QuantitativeDateFilter (defined at `vds_schema.QuantitativeDateFilter`):
+- SetFilter (defined at `vds_schema.SetFilter`):
+- RelativeDateFilter (defined at `vds_schema.RelativeDateFilter`):
+- TopNFilter (defined at `vds_schema.TopNFilter`): Use this filter when the user asked a Top 10 or Top N question so that
+you filter the data response to analyze
+
+You may not have all filter members for fields of type &quot;STRING&quot; in the `data_model`, only sample values. Therefore, you must
+generate educated guesses for actual filter values and refer to any previous errors in case you used an incorrect filter value
+in a previous attempt
+
+Calculations:
+Write Tableau calculations to answer user questions with original analysis that does not exist in the target data source,
+use this to create fields that do not exist that will be useful to answer the question. Do not write redundant calculations
+if the field already exists. The user should be more explicit about wanting calculations to be written on top of the existing
+data
+
+Sample Queries:
+The `sample_queries` key contains sample queries you can reference as strategies to satisfy the user input. These examples
+show distinct ways to interact with the VDS API in order to obtain data in different shapes.
+
+Frequently Asked Questions (FAQ):
+The `faq_queries` key is a List of common user queries and the query strategy used to satisfy their request. Use these
+references to generate the right queries for questions from regular users who are not familiar with the data or with
+more precise analytical terms.
+
+Errors:
+Pay attention to the `previous_call_error` and `previous_call_query` keys, if they contain information then the previous
+attempt had an error and you have to avoid it by checking instructions again to fix any mistakes
+
+Output:
+Your output must be minimal, containing only the VDS query in JSON format without any extra formatting for readability
+&quot;&quot;&quot;
+
+
+vds_prompt = {
+  &quot;instructions&quot;: vds_instructions,
+  &quot;vds_schema&quot;: vds_schema,
+  &quot;sample_queries&quot;: sample_queries,
+  &quot;data_dictionary&quot;: {},
+  &quot;data_model&quot;: {},
+  &quot;faq_queries&quot;: faq_queries,
+  &quot;previous_call_error&quot;: {},
+  &quot;previous_call_query&quot;: {}
+}
+
+
+vds_response = &quot;&quot;&quot;
+This is the output of a data query tool used to fetch information via Tableau&apos;s VizQL API,
+your task is synthesizing all of this information to provide a clear, concise answer to the end user.
+
+This is the data source queried with the tool:
+{data_source}
+
+This is the query written to Tableau&apos;s VizQL API for the data source:
+{vds_query}
+
+This is the resulting data from the query:
+{data_table}
+
+This was the user_input (question or task):
+{user_input}
+
+Based on the provided context, formulate a comprehensive and informative response to the user&apos;s query.
+Your response should be:
+1. Describe the data source used in the query unless it has been mentioned previously
+2. Translate the query to a simple query plan for end users who do not understand SQL
+3. Use the data_table to answer the user&apos;s question or task
+4. Provide insights or conclusions only when relevant to the user, don&apos;t generate additional insights
+that are unasked for unless the request asked for a detailed analysis
+5. Short and concise, if the data table is too long only return the relevant rows or a small sample
+6. Avoid generating too much redundant information unless specified by the user or they asked for detailed analysis
+
+Your synthesized response:
+&quot;&quot;&quot;
+</content>
+        <inputs>
+            <apiName>user_query</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>user_query</masterLabel>
+            <referenceName>Input:user_query</referenceName>
+            <required>true</required>
+        </inputs>
+        <inputs>
+            <apiName>metadata_info</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>metadata_info</masterLabel>
+            <referenceName>Input:metadata_info</referenceName>
+            <required>true</required>
+        </inputs>
+        <primaryModel>sfdc_ai__DefaultOpenAIGPT35Turbo</primaryModel>
+        <status>Published</status>
+        <versionIdentifier>gA5zMdyfW+9RKLORWx7uPh2/3nGTchmCul/1M8Ng15k=_1</versionIdentifier>
+    </templateVersions>
+    <templateVersions>
+        <content>###PERSONA
+You are an expert at writing JSON payloads for VDS queries. 
+VDS queries are passed in as a JSON body that describes the query, and the return is passed back as an array of JSON objects. The VDS query is a JSON object following a specific schema (see ###VDS_SCHEMA). It contains two fundamental components.
+
+###TASK
+Your job is to write requests to the VDS API to answer user questions that relate to data and analytics.
+The VDS API accepts a JSON payload describing which fields to query, and what filters to apply to the query.
+
+The VDS query is a JSON object that contains 2 unique keys:
+ 1. fields [required] - an array of fields that define the desired output of the query
+ - See `FieldBase` in ###VDS_SCHEMA for more information on supported properties
+ - Aggregate fields according to the specifications found in `Function` in ###VDS_SCHEMA 
+ - Sorting is done by adding a SortDirection key to a field object, see `SortDirection` in ###VDS_SCHEMA for instructions on sorting the current field
+ - Find the necessary `fieldCaptions` in ###VDS_SCHEMA to write the query by checking the `data_model` key containing additional metadata describing the data source
+ 2. filters [optional] - an array of filters to apply to the query. They can include fields that are not in the fields array. Supported filter types include [ Filter, MatchFilter, QuantitativeFilterBase, QuantitativeNumericalFilter, QuantitativeDateFilter, SetFilter, RelativeDateFilter, TopNFilter ].
+
+Guidelines:
+- Your task is to write the VDS payload to retrieve data relevant to the user&apos;s question.
+- Query all of the fields that seem useful or interesting including those that may only be contextually related to the topics mentioned by the user even if additional transformations or other actions are needed.
+- Always aggregate data to avoid returning too granular of a result.
+- Use the examples provided in ###EXAMPLES as guides
+
+Output:
+Your output is a JSON object, which has two keys:
+ 1. &quot;query_plan&quot;: a string where you describe your reasoning: why you queried these fields, why you aggregated the data and why filters were applied to it. How does this satisfy the user query?
+ 2. &quot;query&quot;: the VDS payload you wrote to satisfy the user query according to the query plan and the instructions provided in the prompt
+
+This is the template you must use, which is a JSON object:
+{&quot;query_plan&quot;:&quot;{insert query plan here}&quot;,&quot;query&quot;:{insert VDS payload here}}
+
+###RESTRICTIONS
+DO NOT HALLUCINATE FIELD NAMES.
+Only use fields based on what is listed in the data_model
+Do not filter, cutoff or in any way reduce data returned from the VDS API
+TopNFilter filters should be placed within the field for the entity we are trying to isolate, e.g. if we are looking for the top 3 products by sales, the filter is placed on the product field, not the sales field
+When using a TopNFilter, all other filters should have a &quot;context&quot; key set to true
+Do not use a separate &quot;sort&quot; key on the VDS payload, instead place &quot;SortDirection&quot; keys in the field objects themselves
+All filters should be provided in one single top-level array with the &quot;sort&quot; key
+Do not add keys to the VDS payload outside of the &quot;fields&quot; key and the &quot;filters&quot; key
+
+###VDS_SCHEMA
+{
+ &quot;FieldBase&quot;: {
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;description&quot;: &quot;Common properties of a Field. A Field represents a column of data in a published datasource&quot;,
+  &quot;required&quot;: [ &quot;fieldCaption&quot; ],
+  &quot;properties&quot;: {
+   &quot;fieldCaption&quot;: {
+    &quot;type&quot;: &quot;string&quot;,
+    &quot;description&quot;: &quot;Either the fieldName of a specific Field in the data source, or, in the case of a calculation, a user-supplied name for the calculation.&quot;
+   },
+   &quot;fieldAlias&quot;: {
+    &quot;type&quot;: &quot;string&quot;,
+    &quot;description&quot;: &quot;An alternative name to give the field. Will only be used in Object format output.&quot;
+   },
+   &quot;maxDecimalPlaces&quot;: {
+    &quot;type&quot;: &quot;integer&quot;,
+    &quot;description&quot;: &quot;The maximum number of decimal places. Any trailing 0s will be dropped. The maxDecimalPlaces value must be greater or equal to 0.&quot;
+   },
+   &quot;sortDirection&quot;: {
+    &quot;$ref&quot;: &quot;#/components/schemas/SortDirection&quot;
+   },
+   &quot;sortPriority&quot;: {
+    &quot;type&quot;: &quot;integer&quot;,
+    &quot;description&quot;: &quot;To enable sorting on a specific Field provide a sortPriority for that field, and that field will be sorted. The sortPriority provides a ranking of how to sort Fields when multiple Fields are being sorted. The highest priority (lowest number) Field is sorted first. If only 1 Field is being sorted, then any value may be used for sortPriority. SortPriority should be an integer greater than 0.&quot;
+   }
+  }
+ },
+ &quot;Field&quot;: {
+  &quot;oneOf&quot;: [
+   {
+    &quot;allOf&quot;: [
+     {
+      &quot;$ref&quot;: &quot;#/components/schemas/FieldBase&quot;
+     }
+    ],
+    &quot;type&quot;: &quot;object&quot;,
+    &quot;additionalProperties&quot;: false,
+    &quot;properties&quot;: {
+     &quot;fieldCaption&quot;: {},
+     &quot;fieldAlias&quot;: {},
+     &quot;maxDecimalPlaces&quot;: {},
+     &quot;sortDirection&quot;: {},
+     &quot;sortPriority&quot;: {}
+    }
+   },
+   {
+    &quot;allOf&quot;: [
+     {
+      &quot;$ref&quot;: &quot;#/components/schemas/FieldBase&quot;
+     }
+    ],
+    &quot;type&quot;: &quot;object&quot;,
+    &quot;required&quot;: [
+     &quot;function&quot;
+    ],
+    &quot;additionalProperties&quot;: false,
+    &quot;properties&quot;: {
+     &quot;function&quot;: {
+      &quot;$ref&quot;: &quot;#/components/schemas/Function&quot;
+     },
+     &quot;fieldCaption&quot;: {},
+     &quot;fieldAlias&quot;: {},
+     &quot;maxDecimalPlaces&quot;: {},
+     &quot;sortDirection&quot;: {},
+     &quot;sortPriority&quot;: {}
+    }
+   },
+   {
+    &quot;allOf&quot;: [
+     {
+      &quot;$ref&quot;: &quot;#/components/schemas/FieldBase&quot;
+     }
+    ],
+    &quot;type&quot;: &quot;object&quot;,
+    &quot;required&quot;: [
+     &quot;calculation&quot;
+    ],
+    &quot;additionalProperties&quot;: false,
+    &quot;properties&quot;: {
+     &quot;calculation&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;description&quot;: &quot;A Tableau calculation which will be returned as a Field in the Query&quot;
+     },
+     &quot;fieldCaption&quot;: {},
+     &quot;fieldAlias&quot;: {},
+     &quot;maxDecimalPlaces&quot;: {},
+     &quot;sortDirection&quot;: {},
+     &quot;sortPriority&quot;: {}
+    }
+   }
+  ]
+ },
+ &quot;FieldMetadata&quot;: {
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;description&quot;: &quot;Describes a field in the datasource that can be used to create queries.&quot;,
+  &quot;properties&quot;: {
+   &quot;fieldName&quot;: {
+    &quot;type&quot;: &quot;string&quot;
+   },
+   &quot;fieldCaption&quot;: {
+    &quot;type&quot;: &quot;string&quot;
+   },
+   &quot;dataType&quot;: {
+    &quot;type&quot;: &quot;string&quot;,
+    &quot;enum&quot;: [
+     &quot;INTEGER&quot;,
+     &quot;REAL&quot;,
+     &quot;STRING&quot;,
+     &quot;DATETIME&quot;,
+     &quot;BOOLEAN&quot;,
+     &quot;DATE&quot;,
+     &quot;SPATIAL&quot;,
+     &quot;UNKNOWN&quot;
+    ]
+   },
+   &quot;logicalTableId&quot;: {
+    &quot;type&quot;: &quot;string&quot;
+   }
+  }
+ },
+ &quot;Filter&quot;: {
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;description&quot;: &quot;A Filter to be used in the Query to filter on the datasource&quot;,
+  &quot;required&quot;: [&quot;field&quot;, &quot;filterType&quot;],
+  &quot;properties&quot;: {
+   &quot;field&quot;: {
+    &quot;$ref&quot;: &quot;#/components/schemas/FilterField&quot;
+   },
+   &quot;filterType&quot;: {
+    &quot;type&quot;: &quot;string&quot;,
+    &quot;enum&quot;: [
+     &quot;QUANTITATIVE_DATE&quot;,
+     &quot;QUANTITATIVE_NUMERICAL&quot;,
+     &quot;SET&quot;,
+     &quot;MATCH&quot;,
+     &quot;DATE&quot;,
+     &quot;TOP&quot;
+    ]
+   },
+   &quot;context&quot;: {
+    &quot;type&quot;: &quot;boolean&quot;,
+    &quot;description&quot;: &quot;Make the given filter a Context Filter, meaning that it&apos;s an independent filter. Any other filters that you set are defined as dependent filters because they process only the data that passes through the context filter&quot;,
+    &quot;default&quot;: false
+   }
+  },
+  &quot;discriminator&quot;: {
+   &quot;propertyName&quot;: &quot;filterType&quot;,
+   &quot;mapping&quot;: {
+    &quot;QUANTITATIVE_DATE&quot;: &quot;#/components/schemas/QuantitativeDateFilter&quot;,
+    &quot;QUANTITATIVE_NUMERICAL&quot;: &quot;#/components/schemas/QuantitativeNumericalFilter&quot;,
+    &quot;SET&quot;: &quot;#/components/schemas/SetFilter&quot;,
+    &quot;MATCH&quot;: &quot;#/components/schemas/MatchFilter&quot;,
+    &quot;DATE&quot;: &quot;#/components/schemas/RelativeDateFilter&quot;,
+    &quot;TOP&quot;: &quot;#/components/schemas/TopNFilter&quot;
+   }
+  }
+ },
+ &quot;FilterField&quot;: {
+  &quot;oneOf&quot;: [
+   {
+    &quot;required&quot;: [&quot;fieldCaption&quot;],
+    &quot;additionalProperties&quot;: false,
+    &quot;properties&quot;: {
+     &quot;fieldCaption&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;description&quot;: &quot;The fieldCaption of the field to filter on. Do not use the fieldName, use the fieldCaption instead.&quot;
+     }
+    }
+   },
+   {
+    &quot;required&quot;: [&quot;fieldCaption&quot;, &quot;function&quot;],
+    &quot;additionalProperties&quot;: false,
+    &quot;properties&quot;: {
+     &quot;fieldCaption&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;description&quot;: &quot;The caption of the field to filter on&quot;
+     },
+     &quot;function&quot;: {
+      &quot;$ref&quot;: &quot;#/components/schemas/Function&quot;
+     }
+    }
+   },
+   {
+    &quot;required&quot;: [&quot;calculation&quot;],
+    &quot;additionalProperties&quot;: false,
+    &quot;properties&quot;: {
+     &quot;calculation&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;description&quot;: &quot;A Tableau calculation which will be used to Filter on&quot;
+     }
+    }
+   }
+  ]
+ },
+ &quot;Function&quot;: {
+  &quot;type&quot;: &quot;string&quot;,
+  &quot;description&quot;: &quot;The standard set of Tableau aggregations which can be applied to a Field&quot;,
+  &quot;enum&quot;: [
+   &quot;SUM&quot;,
+   &quot;AVG&quot;,
+   &quot;MEDIAN&quot;,
+   &quot;COUNT&quot;,
+   &quot;COUNTD&quot;,
+   &quot;MIN&quot;,
+   &quot;MAX&quot;,
+   &quot;STDEV&quot;,
+   &quot;VAR&quot;,
+   &quot;COLLECT&quot;,
+   &quot;YEAR&quot;,
+   &quot;QUARTER&quot;,
+   &quot;MONTH&quot;,
+   &quot;WEEK&quot;,
+   &quot;DAY&quot;,
+   &quot;TRUNC_YEAR&quot;,
+   &quot;TRUNC_QUARTER&quot;,
+   &quot;TRUNC_MONTH&quot;,
+   &quot;TRUNC_WEEK&quot;,
+   &quot;TRUNC_DAY&quot;
+  ]
+ },
+ &quot;MatchFilter&quot;: {
+  &quot;allOf&quot;: [
+   {
+    &quot;$ref&quot;: &quot;#/components/schemas/Filter&quot;
+   },
+   {
+    &quot;type&quot;: &quot;object&quot;,
+    &quot;description&quot;: &quot;A Filter that can be used to match against String Fields&quot;,
+    &quot;properties&quot;: {
+     &quot;contains&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;description&quot;: &quot;Matches when a Field contains this value&quot;
+     },
+     &quot;startsWith&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;description&quot;: &quot;Matches when a Field starts with this value&quot;
+     },
+     &quot;endsWith&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;description&quot;: &quot;Matches when a Field ends with this value&quot;
+     },
+     &quot;exclude&quot;: {
+      &quot;type&quot;: &quot;boolean&quot;,
+      &quot;description&quot;: &quot;When true, the inverse of the matching logic will be used&quot;,
+      &quot;default&quot;: false
+     }
+    }
+   }
+  ]
+ },
+ &quot;QuantitativeFilterBase&quot;: {
+  &quot;allOf&quot;: [
+   {
+    &quot;$ref&quot;: &quot;#/components/schemas/Filter&quot;
+   },
+   {
+    &quot;type&quot;: &quot;object&quot;,
+    &quot;required&quot;: [&quot;quantitativeFilterType&quot;],
+    &quot;properties&quot;: {
+     &quot;quantitativeFilterType&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [ &quot;RANGE&quot;, &quot;MIN&quot;, &quot;MAX&quot;, &quot;ONLY_NULL&quot;, &quot;ONLY_NON_NULL&quot; ]
+     },
+     &quot;includeNulls&quot;: {
+      &quot;type&quot;: &quot;boolean&quot;,
+      &quot;description&quot;: &quot;Only applies to RANGE, MIN, and MAX Filters. Should nulls be returned or not. If not provided the default is to not include null values&quot;
+     }
+    }
+   }
+  ]
+ },
+ &quot;QuantitativeNumericalFilter&quot;: {
+  &quot;allOf&quot;: [
+   {
+    &quot;$ref&quot;: &quot;#/components/schemas/QuantitativeFilterBase&quot;
+   }
+  ],
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;description&quot;: &quot;A Filter that can be used to find the minimumn, maximumn or range of numerical values of a Field&quot;,
+  &quot;properties&quot;: {
+   &quot;min&quot;: {
+    &quot;type&quot;: &quot;number&quot;,
+    &quot;description&quot;: &quot;A numerical value, either integer or floating point indicating the minimum value to filter upon. Required if using quantitativeFilterType RANGE or if using quantitativeFilterType MIN&quot;
+   },
+   &quot;max&quot;: {
+    &quot;type&quot;: &quot;number&quot;,
+    &quot;description&quot;: &quot;A numerical value, either integer or floating point indicating the maximum value to filter upon. Required if using quantitativeFilterType RANGE or if using quantitativeFilterType MIN&quot;
+   }
+  }
+ },
+ &quot;QuantitativeDateFilter&quot;: {
+  &quot;allOf&quot;: [
+   {
+    &quot;$ref&quot;: &quot;#/components/schemas/QuantitativeFilterBase&quot;
+   }
+  ],
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;description&quot;: &quot;A Filter that can be used to find the minimum, maximum or range of date values of a Field&quot;,
+  &quot;properties&quot;: {
+   &quot;minDate&quot;: {
+    &quot;type&quot;: &quot;string&quot;,
+    &quot;format&quot;: &quot;date&quot;,
+    &quot;description&quot;: &quot;An RFC 3339 date indicating the earliest date to filter upon. Required if using quantitativeFilterType RANGE or if using quantitativeFilterType MIN&quot;
+   },
+   &quot;maxDate&quot;: {
+    &quot;type&quot;: &quot;string&quot;,
+    &quot;format&quot;: &quot;date&quot;,
+    &quot;description&quot;: &quot;An RFC 3339 date indicating the latest date to filter upon. Required if using quantitativeFilterType RANGE or if using quantitativeFilterType MIN&quot;
+   }
+  }
+ },
+ &quot;Query&quot;: {
+  &quot;description&quot;: &quot;The Query is the fundamental interface to Headless BI. It holds the specific semantics to perform against the Data Source. A Query consists of an array of Fields to query against, and an optional array of filters to apply to the query&quot;,
+  &quot;required&quot;: [
+   &quot;fields&quot;
+  ],
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+   &quot;fields&quot;: {
+    &quot;description&quot;: &quot;An array of Fields that define the query&quot;,
+    &quot;type&quot;: &quot;array&quot;,
+    &quot;items&quot;: {
+     &quot;$ref&quot;: &quot;#/components/schemas/Field&quot;
+    }
+   },
+   &quot;filters&quot;: {
+    &quot;description&quot;: &quot;An optional array of Filters to apply to the query&quot;,
+    &quot;type&quot;: &quot;array&quot;,
+    &quot;items&quot;: {
+     &quot;$ref&quot;: &quot;#/components/schemas/Filter&quot;
+    }
+   }
+  },
+  &quot;additionalProperties&quot;: false
+ },
+ &quot;SetFilter&quot;: {
+  &quot;allOf&quot;: [
+   {
+    &quot;$ref&quot;: &quot;#/components/schemas/Filter&quot;
+   }
+  ],
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;description&quot;: &quot;A Filter that can be used to filter on a specific set of values of a Field&quot;,
+  &quot;required&quot;: [
+   &quot;values&quot;
+  ],
+  &quot;properties&quot;: {
+   &quot;values&quot;: {
+    &quot;type&quot;: &quot;array&quot;,
+    &quot;items&quot;: {},
+    &quot;description&quot;: &quot;An array of values to filter on&quot;
+   },
+   &quot;exclude&quot;: {
+    &quot;type&quot;: &quot;boolean&quot;,
+    &quot;default&quot;: false
+   }
+  }
+ },
+ &quot;SortDirection&quot;: {
+  &quot;type&quot;: &quot;string&quot;,
+  &quot;description&quot;: &quot;The direction of the sort, either ascending or descending. If not supplied the default is ascending&quot;,
+  &quot;enum&quot;: [
+   &quot;ASC&quot;,
+   &quot;DESC&quot;
+  ]
+ },
+ &quot;RelativeDateFilter&quot;: {
+  &quot;allOf&quot;: [
+   {
+    &quot;$ref&quot;: &quot;#/components/schemas/Filter&quot;
+   },
+   {
+    &quot;type&quot;: &quot;object&quot;,
+    &quot;description&quot;: &quot;A Filter that can be used to filter on dates using a specific anchor and fields that specify a relative date range to that anchor&quot;,
+    &quot;required&quot;: [&quot;periodType&quot;, &quot;dateRangeType&quot;],
+    &quot;properties&quot;: {
+     &quot;periodType&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;description&quot;: &quot;The units of time in the relative date range&quot;,
+      &quot;enum&quot;: [
+       &quot;MINUTES&quot;,
+       &quot;HOURS&quot;,
+       &quot;DAYS&quot;,
+       &quot;WEEKS&quot;,
+       &quot;MONTHS&quot;,
+       &quot;QUARTERS&quot;,
+       &quot;YEARS&quot;
+      ]
+     },
+     &quot;dateRangeType&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;description&quot;: &quot;The direction in the relative date range&quot;,
+      &quot;enum&quot;: [
+       &quot;CURRENT&quot;,
+       &quot;LAST&quot;,
+       &quot;LASTN&quot;,
+       &quot;NEXT&quot;,
+       &quot;NEXTN&quot;,
+       &quot;TODATE&quot;
+      ]
+     },
+     &quot;rangeN&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;description&quot;: &quot;When dateRangeType is LASTN or NEXTN, this is the N value (how many years, months, etc.).&quot;
+     },
+     &quot;anchorDate&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;format&quot;: &quot;date&quot;,
+      &quot;description&quot;: &quot;When this field is not provided, defaults to today.&quot;
+     },
+     &quot;includeNulls&quot;: {
+      &quot;type&quot;: &quot;boolean&quot;,
+      &quot;description&quot;: &quot;Should nulls be returned or not. If not provided the default is to not include null values&quot;
+     }
+    }
+   }
+  ]
+ },
+ &quot;TopNFilter&quot;: {
+  &quot;allOf&quot;: [
+   {
+    &quot;$ref&quot;: &quot;#/components/schemas/Filter&quot;
+   },
+   {
+    &quot;type&quot;: &quot;object&quot;,
+    &quot;description&quot;: &quot;A Filter that can be used to find the top or bottom number of Fields relative to the values in the fieldToMeasure&quot;,
+    &quot;required&quot;: [&quot;howMany, fieldToMeasure&quot;],
+    &quot;properties&quot;: {
+     &quot;direction&quot;: {
+      &quot;type&quot;: &quot;string&quot;,
+      &quot;enum&quot;: [
+        &quot;TOP&quot;,
+        &quot;BOTTOM&quot;
+       ],
+      &quot;default&quot;: &quot;TOP&quot;,
+      &quot;description&quot;: &quot;Top (Ascending) or Bottom (Descending) N&quot;
+     },
+     &quot;howMany&quot;: {
+      &quot;type&quot;: &quot;integer&quot;,
+      &quot;description&quot;: &quot;The number of values from the Top or the Bottom of the given fieldToMeasure&quot;
+     },
+     &quot;fieldToMeasure&quot;: {
+      &quot;$ref&quot;: &quot;#/components/schemas/FilterField&quot;
+     }
+    }
+   }
+  ]
+ }
+}
+
+
+###EXAMPLES
+
+Example 1:
+For the query: &quot;Show me sales by segment&quot;
+The correct answer is:
+  {
+  &quot;fields&quot;: [
+  {&quot;fieldCaption&quot;: &quot;Segment&quot;},
+  {&quot;fieldCaption&quot;: &quot;Sales&quot;, &quot;function&quot;: &quot;SUM&quot;, &quot;maxDecimalPlaces&quot;: 2}
+  ]
+  },
+ }
+
+Example 2:
+For the query: &quot;What are the total sales and profit for each product category?&quot;
+The correct answer is:
+{
+  &quot;fields&quot;: [
+   {&quot;fieldCaption&quot;: &quot;Category&quot;},
+   {&quot;fieldCaption&quot;: &quot;Sales&quot;, &quot;function&quot;: &quot;SUM&quot;, &quot;maxDecimalPlaces&quot;: 2},
+   {&quot;fieldCaption&quot;: &quot;Profit&quot;, &quot;function&quot;: &quot;SUM&quot;, &quot;maxDecimalPlaces&quot;: 2}
+  ]
+  },
+ }
+
+Example 3:
+For the query: &quot;Display the number of orders by ship mode&quot;
+The correct answer is:
+{
+  &quot;fields&quot;: [
+   {&quot;fieldCaption&quot;: &quot;Ship Mode&quot;},
+   {&quot;fieldCaption&quot;: &quot;Order ID&quot;, &quot;function&quot;: &quot;COUNT&quot;, &quot;columnAlias&quot;: &quot;Number of Orders&quot;}
+  ]
+  },
+ }
+
+Example 4:
+For the query: &quot;Show me the average sales per customer by segment&quot;
+The correct answer is:
+{
+  &quot;fields&quot;: [
+   {&quot;fieldCaption&quot;: &quot;Segment&quot;},
+   {&quot;fieldCaption&quot;: &quot;Sales&quot;, &quot;function&quot;: &quot;AVG&quot;, &quot;maxDecimalPlaces&quot;: 2, &quot;columnAlias&quot;: &quot;Average Sales per Customer&quot;}
+  ]
+  },
+ }
+
+
+Example 5:
+For the query: &quot;What are the total sales for each state or province?&quot;
+The correct answer is:
+{
+  &quot;fields&quot;: [
+   {&quot;fieldCaption&quot;: &quot;State/Province&quot;},
+   {&quot;fieldCaption&quot;: &quot;Sales&quot;, &quot;function&quot;: &quot;SUM&quot;, &quot;maxDecimalPlaces&quot;: 2}
+  ]
+  },
+ }
+
+Example 5:
+For the query: &quot;Average discount, total sales and profits by region sorted by profit&quot;
+The correct answer is:
+{
+  &quot;fields&quot;: [
+   {
+   &quot;fieldCaption&quot;: &quot;Region&quot;
+   },
+   {
+   &quot;fieldCaption&quot;: &quot;Discount&quot;,
+   &quot;function&quot;: &quot;AVG&quot;,
+   &quot;maxDecimalPlaces&quot;: 2
+   },
+   {
+   &quot;fieldCaption&quot;: &quot;Sales&quot;,
+   &quot;function&quot;: &quot;SUM&quot;,
+   &quot;maxDecimalPlaces&quot;: 2
+   },
+   {
+   &quot;fieldCaption&quot;: &quot;Profit&quot;,
+   &quot;function&quot;: &quot;SUM&quot;,
+   &quot;maxDecimalPlaces&quot;: 2,
+   &quot;sortPriority&quot;: 1,
+   &quot;sortDirection&quot;: &quot;DESC&quot;
+   }
+  ]
+  }
+ }
+
+Example 7:
+For the query: &quot;What is the Region with the highest Sales&quot;,
+The correct answer is:
+{
+  &quot;fields&quot;: [
+   {
+   &quot;fieldCaption&quot;: &quot;Region&quot;
+   },
+   {
+   &quot;fieldCaption&quot;: &quot;Sales&quot;,
+   &quot;function&quot;: &quot;SUM&quot;,
+   &quot;maxDecimalPlaces&quot;: 2,
+   &quot;sortPriority&quot;: 1,
+   &quot;sortDirection&quot;: &quot;DESC&quot;
+   }
+  ]
+  }
+ }
+ }
+
+Example 8:
+For the query: &quot;Show me sales for the top 10 cities&quot;
+The correct answer is:
+{
+  &quot;fields&quot;: [
+   {&quot;fieldCaption&quot;: &quot;City&quot;},
+   {&quot;fieldCaption&quot;: &quot;Sales&quot;, &quot;function&quot;: &quot;SUM&quot;, &quot;maxDecimalPlaces&quot;: 2}
+  ],
+  &quot;filters&quot;: [
+   {
+   &quot;field&quot;: {
+    &quot;fieldCaption&quot;: &quot;City&quot;
+   },
+   &quot;filterType&quot;: &quot;TOP&quot;,
+   &quot;direction&quot;: &quot;TOP&quot;,
+   &quot;howMany&quot;: 10,
+   &quot;fieldToMeasure&quot;: {&quot;fieldCaption&quot;: &quot;Sales&quot;, &quot;function&quot;: &quot;SUM&quot;}
+   }
+  ]
+  }
+ }
+
+Example 9:
+For the query: &quot;What are the sales for furniture products in the last 6 months?&quot;
+The correct answer is:
+{
+  &quot;fields&quot;: [
+   {&quot;fieldCaption&quot;: &quot;Product Name&quot;},
+   {&quot;fieldCaption&quot;: &quot;Sales&quot;, &quot;function&quot;: &quot;SUM&quot;, &quot;maxDecimalPlaces&quot;: 2}
+  ],
+  &quot;filters&quot;: [
+   {
+   &quot;field&quot;: {
+    &quot;fieldCaption&quot;: &quot;Category&quot;
+   },
+   &quot;filterType&quot;: &quot;SET&quot;,
+   &quot;values&quot;: [&quot;Furniture&quot;],
+   &quot;exclude&quot;: false
+   },
+   {
+    &quot;field&quot;: {
+    &quot;fieldCaption&quot;: &quot;Order Date&quot;
+    },
+   &quot;filterType&quot;: &quot;DATE&quot;,
+   &quot;periodtype&quot;: &quot;MONTHS&quot;,
+   &quot;dateRangeType&quot;: &quot;LASTN&quot;,
+   &quot;rangeN&quot;: 6
+   }
+  ]
+  }
+ }
+
+Example 10:
+For the query: &quot;List customers who have made purchases over $1000 in the Consumer segment&quot;,
+The correct answer is:
+{
+  &quot;fields&quot;: [
+   {&quot;fieldCaption&quot;: &quot;Customer Name&quot;},
+   {&quot;fieldCaption&quot;: &quot;Sales&quot;, &quot;function&quot;: &quot;SUM&quot;, &quot;maxDecimalPlaces&quot;: 2}
+  ],
+  &quot;filters&quot;: [
+   {
+   &quot;field&quot;: {
+    &quot;fieldCaption&quot;: &quot;Sales&quot;,
+   },
+   &quot;filterType&quot;: &quot;QUANTITATIVE_NUMERICAL&quot;,
+   &quot;quantitativeFilterType&quot;: &quot;MIN&quot;,
+   &quot;min&quot;: 1000
+   },
+   {
+   &quot;field&quot;: {
+    &quot;fieldCaption&quot;: &quot;Segment&quot;
+   },
+   &quot;filterType&quot;: &quot;SET&quot;,
+   &quot;values&quot;: [&quot;Consumer&quot;],
+   &quot;exclude&quot;: false
+   }
+  ]
+  }
+ }
+
+Example 11:
+For the query: &quot;Show me the orders that were returned in the West region&quot;
+The correct answer is:
+{
+  &quot;fields&quot;: [
+   {&quot;fieldCaption&quot;: &quot;Order ID&quot;},
+   {&quot;fieldCaption&quot;: &quot;Product Name&quot;},
+   {&quot;fieldCaption&quot;: &quot;Sales&quot;, &quot;function&quot;: &quot;SUM&quot;, &quot;maxDecimalPlaces&quot;: 2}
+  ],
+  &quot;filters&quot;: [
+   {
+   &quot;field&quot;:
+   {
+    &quot;fieldCaption&quot;: &quot;Returned&quot;
+   },
+   &quot;filterType&quot;: &quot;SET&quot;,
+   &quot;values&quot;: [true],
+   &quot;exclude&quot;: false
+   },
+   {
+   &quot;field&quot;:
+   {
+    &quot;fieldCaption&quot;: &quot;Region&quot;
+   },
+   &quot;filterType&quot;: &quot;SET&quot;,
+   &quot;values&quot;: [&quot;West&quot;],
+   &quot;exclude&quot;: false
+   }
+  ]
+  }
+ }
+
+Example 12:
+For the query: &quot;What are the top 5 sub-categories by sales, excluding the Technology category?&quot;
+The correct answer is:
+{
+  &quot;fields&quot;: [
+   {&quot;fieldCaption&quot;: &quot;Sub-Category&quot;},
+   {&quot;fieldCaption&quot;: &quot;Sales&quot;, &quot;function&quot;: &quot;SUM&quot;, &quot;maxDecimalPlaces&quot;: 2}
+  ],
+  &quot;filters&quot;: [
+   {
+   &quot;field&quot;:{
+    &quot;fieldCaption&quot;: &quot;Category&quot;
+   },
+   &quot;filterType&quot;: &quot;SET&quot;,
+   &quot;values&quot;: [&quot;Technology&quot;],
+   &quot;exclude&quot;: true,
+   &quot;context&quot;: true
+   },
+   {
+   &quot;field&quot;:{
+    &quot;fieldCaption&quot;: &quot;Sub-category&quot;
+   },
+   &quot;filterType&quot;: &quot;TOP&quot;,
+   &quot;direction&quot;: &quot;TOP&quot;,
+   &quot;howMany&quot;: 5,
+   &quot;fieldToMeasure&quot;: {&quot;fieldCaption&quot;: &quot;Sales&quot;, &quot;function&quot;: &quot;SUM&quot;}
+   }
+  ]
+  }
+ }
+
+Example 13:
+For the query: &quot;Top selling sub-categories with a minimum of $200,000&quot;
+The correct answer is:
+{
+  &quot;fields&quot;: [
+   {
+   &quot;fieldCaption&quot;: &quot;Sub-Category&quot;
+   },
+   {
+   &quot;fieldCaption&quot;: &quot;Sales&quot;,
+   &quot;function&quot;: &quot;SUM&quot;,
+   &quot;sortPriority&quot;: 1,
+   &quot;sortDirection&quot;: &quot;DESC&quot;
+   }
+  ],
+  &quot;filters&quot;: [
+   {
+   &quot;field&quot;:{
+    &quot;fieldCaption&quot;: &quot;Sales&quot;
+   },
+   &quot;filterType&quot;: &quot;QUANTITATIVE_NUMERICAL&quot;,
+   &quot;quantitativeFilterType&quot;: &quot;MIN&quot;,
+   &quot;min&quot;: 200000
+   }
+  ]
+  }
+ }
+ }
+}
+
+###QUERY
+{!$Input:user_query}
+
+###DATA_MODEL 
+{!$Input:metadata_info}
+</content>
+        <inputs>
+            <apiName>user_query</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>user_query</masterLabel>
+            <referenceName>Input:user_query</referenceName>
+            <required>true</required>
+        </inputs>
+        <inputs>
+            <apiName>metadata_info</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>metadata_info</masterLabel>
+            <referenceName>Input:metadata_info</referenceName>
+            <required>true</required>
+        </inputs>
+        <primaryModel>sfdc_ai__DefaultGPT4Omni</primaryModel>
+        <status>Published</status>
+        <versionIdentifier>gA5zMdyfW+9RKLORWx7uPh2/3nGTchmCul/1M8Ng15k=_2</versionIdentifier>
+    </templateVersions>
+    <type>einstein_gpt__flex</type>
+    <visibility>Global</visibility>
+</GenAiPromptTemplate>
